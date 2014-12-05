@@ -32,7 +32,6 @@
 # Author: Kjeld Jensen <kjen@mmmi.sdu.dk>
 # Created:  2014-01-09 Kjeld Jensen
 # Modified: 2014-08-17 Kjeld Jensen, added define for 12V measurement
-# Modified: 2014-09-23 Mikkel Kildemand Larsen, modified to fit FroboLightHouse
 ****************************************************************************/
 
 #ifndef _FMCTL_H /* only define the below once */
@@ -67,21 +66,6 @@
 #define EXT_LED_INIT			PB_OUT (DDRE,DDE5) /* set LED bit as output */
 #define EXT_LED_ON				PB_LOW (PORTE,PE5) /* turn LED on */
 #define EXT_LED_OFF				PB_HIGH (PORTE,PE5) /* turn LED off */
-
-/* FroboLightHouse RED defines */
-#define INT_RED_INIT			PB_OUT (DDRA,DDA1) /* set LED bit as output */
-#define INT_RED_OFF				PB_LOW (PORTA,PA1) /* turn LED on */
-#define INT_RED_ON				PB_HIGH (PORTA,PA1) /* turn LED off */
-
-/* FroboLightHouse Yellow defines */
-#define INT_YELLOW_INIT			PB_OUT (DDRA,DDA2) /* set LED bit as output */
-#define INT_YELLOW_OFF				PB_LOW (PORTA,PA2) /* turn LED on */
-#define INT_YELLOW_ON				PB_HIGH (PORTA,PA2) /* turn LED off */
-
-/* FroboLightHouse Green defines */
-#define INT_GREEN_INIT			PB_OUT (DDRA,DDA3) /* set LED bit as output */
-#define INT_GREEN_OFF				PB_LOW (PORTA,PA3) /* turn LED on */
-#define INT_GREEN_ON				PB_HIGH (PORTA,PA3) /* turn LED off */
 
 /* switch defines */
 #define SWITCH_INIT				PB_PULL_UP( PORTA, PA6)

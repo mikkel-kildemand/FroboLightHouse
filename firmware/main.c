@@ -46,6 +46,7 @@
 #include "fmctrl_def.h"
 #include "avr_serial.h"
 #include "rcnmea.h"
+#include "LightHouse.h"
 
 /***************************************************************************/
 /* defines */
@@ -70,8 +71,6 @@
 //#define VOLTAGE_MIN_DEFAULT		320 /* default minimum voltage (12V) */
 #define VOLTAGE_MIN_DEFAULT		100 /* default minimum voltage (12V) */
 
-
-
 /* signal led defines */
 #define LED_STATE_OFF			0
 #define LED_STATE_ON			1
@@ -90,21 +89,6 @@
 /* NMEA defines */
 #define NMEA_WD_TOUT			2 /* 1/10 [s] without receiving ok NMEA before timeout */
 
-/* FroboLightHouse defines  */
-
-#define FLH_Port			PORTA
-
-#define RED_STATE_OFF			0
-#define RED_STATE_ON			1
-#define RED_DELAY				4 /* times the cycle */
-
-#define YELLOW_STATE_OFF		0
-#define YELLOW_STATE_ON			1
-#define YELLOW_DELAY			4 /* times the cycle */
-
-#define GREEN_STATE_OFF			0
-#define GREEN_STATE_ON			1
-#define GREEN_DELAY				4 /* times the cycle */
 
 /***************************************************************************/
 /* global and static variables */
@@ -124,18 +108,6 @@ char led_count;
 char but1;
 
 /* FroboLightHouse variables */
-
-char red_state;
-char red_signal;
-char red_count;
-
-char yellow_state;
-char yellow_signal;
-char yellow_count;
-
-char green_state;
-char green_signal;
-char green_count;
 
 int red;
 int yellow;
@@ -164,6 +136,7 @@ extern char state;
 //unsigned volatile char FroboLightHouse_fault_warning;
 //unsigned volatile char FLH_reset;
 
+//void LightHouse_Update(int red_signal, int yellow_signal, int green_signal);
 
 /***************************************************************************/
 void sched_init(void)
@@ -200,118 +173,7 @@ void FroboLightHouse_Init (void)
 	DDRA = 	0b00001111;  //Pin 0, 1, 2 and 3 of PORTA declared as input
 	PORTA= 	0x00;			//No pullup
 }
-/***************************************************************************/
-void FroboLightHouse_RED_Update(void)
-{
 
-	if (red_signal == 0)
-	{
-		INT_RED_OFF;	
-	}
-
-	else if (red_signal < 10)
-	{
-		switch (red_state) {
-			case RED_STATE_ON:
-				red_state = RED_STATE_OFF;
-				INT_RED_OFF;
-				break;
-
-			case RED_STATE_OFF:
-				red_count++;
-				if (red_count <= red_signal) {
-					INT_RED_ON;
-					red_state = RED_STATE_ON;
-				}
-				else if (red_count > red_signal + RED_DELAY) {
-					red_count = 0;
-				}
-				break;
-		}
-	}
-	else if (red_signal == 10)
-	{
-		INT_RED_ON;	
-	}
-	else
-	{
-		INT_RED_OFF;	
-	}
-}
-/***************************************************************************/
-void FroboLightHouse_YELLOW_Update(void)
-{
-	if (yellow_signal == 0)
-	{
-		INT_YELLOW_OFF;	
-	}
-
-	else if (yellow_signal < 10)
-	{
-		switch (yellow_state) {
-			case YELLOW_STATE_ON:
-				yellow_state = YELLOW_STATE_OFF;
-				INT_YELLOW_OFF;
-				break;
-
-			case YELLOW_STATE_OFF:
-				yellow_count++;
-				if (yellow_count <= yellow_signal) {
-					INT_YELLOW_ON;
-					yellow_state = YELLOW_STATE_ON;
-				}
-				else if (yellow_count > yellow_signal + YELLOW_DELAY) {
-					yellow_count = 0;
-				}
-				break;
-		}
-	}
-	else if (yellow_signal == 10)
-	{
-		INT_YELLOW_ON;	
-	}
-	else
-	{
-		INT_YELLOW_OFF;	
-	}
-}
-/***************************************************************************/
-void FroboLightHouse_GREEN_Update(void)
-{
-	if (green_signal == 0)
-	{
-		INT_GREEN_OFF;	
-	}
-
-	else if (green_signal < 10)
-	{
-		switch (green_state) {
-			case GREEN_STATE_ON:
-				green_state = GREEN_STATE_OFF;
-				INT_GREEN_OFF;
-				break;
-
-			case GREEN_STATE_OFF:
-				green_count++;
-				if (green_count <= green_signal) {
-					INT_GREEN_ON;
-					green_state = GREEN_STATE_ON;
-				}
-				else if (green_count > green_signal + GREEN_DELAY) {
-					green_count = 0;
-				}
-				break;
-		}
-	}
-	else if (green_signal == 10)
-	{
-		INT_GREEN_ON;	
-	}
-	else
-	{
-		INT_GREEN_OFF;	
-	}
-}
 /***************************************************************************/
 void adc_init (void)
 {
@@ -369,12 +231,14 @@ void led_init(void)
 /***************************************************************************/
 void button_update(void)
 {
-	but1 = PB_IS_HIGH (PIND, PIND7); /* button enabled if logic zero */
+	but1 = PB_IS_HIGH (PINA, PINA6); /* button enabled if logic zero */
+	but1 = PB_IS_HIGH (PINA, PINA7); /* button enabled if logic zero */
 }
 /***************************************************************************/
 void button_init(void)
 {
-	PB_PULL_UP (PORTD, PD7); /* enable pull-up resistor */
+	PB_PULL_UP (PORTA, PA6); /* enable pull-up resistor */
+	PB_PULL_UP (PORTA, PA7); /* enable pull-up resistor */
 	button_update();
 }
 /***************************************************************************/
@@ -394,7 +258,7 @@ void nmea_init(void)
 	tx[8] = ',';
 	tx[9] = '1'; /* sw major version */	
 	tx[10] = ',';
-	tx[11] = '1'; /* sw minor version */
+	tx[11] = '2'; /* sw minor version */
 	tx[12] = ',';
 	tx[13] = '0' + reset_source; /* latest reset type */
 	tx_len = 14;
@@ -435,12 +299,6 @@ void nmea_rx_parse(void)
 
 		}
 
-/*		else if (rx[3] == 'A' && rx[4] == 'R'&& rx[6] == 'R'&& rx[7] == 'E'&& rx[8] == 'S'&& rx[9] == 'E'&& rx[10] == 'T') // Actuator Control
-		{
-			rx_ite = 5; // jump to first value 
-			act_reset = true;
-			actuator_param_received = true;
-		}*/
 	}
 }
 /***************************************************************************/
@@ -468,35 +326,37 @@ void state_update(void)
 	if (battery_low_warning == true)
 	{
 		state = STATE_ERR_LOWBAT;
-//		red_signal = 10;
 	}
 	else if (nmea_wd > NMEA_WD_TOUT)
 	{
-		state = STATE_ERR_WATCHDOG; 
+		// Blokker, gemt til vedligehold, sættes foran "state = STATE_ERR_WATCHDOG;" : //test-melder ikke fejl på wathdog -
+		
+		if (SWITCH_1_IS_ON) {		//If sw1 is set, the watchdog will nor be never be set.
+		state = STATE_ERR_WATCHDOG;
+		} 
 		FroboLightHouse_param_received = false;
-		red_signal = 10;
-		yellow_signal = 0;
-		green_signal = 0;
+		red_command = 10;
+		yellow_command = 0;
+		green_command = 0;
 	}
 	else if (FroboLightHouse_param_received == false)
 	{
 		state = STATE_ERR_NO_CONFIG; 
-		red_signal = 10;
-		yellow_signal = 0;
-		green_signal = 0;
+		red_command = 10;
+		yellow_command = 0;
+		green_command = 0;
 	}
 	else if (nmea_err != 0)
 	{
 		state = STATE_WARN_NMEA_CS;
 		nmea_err = 0;
-//		red_signal = 10;		
 	}		
 	else
 	{
 		state = STATE_OK;
-		red_signal = red;
-		yellow_signal = yellow;
-		green_signal = green;
+		red_command = red;
+		yellow_command = yellow;
+		green_command = green;
 	}
 
 	led_signal = state; /* Frobomind Controller LED flashes state number */
@@ -536,9 +396,7 @@ void sched_update (void)
 		{
 			button_update();		
 			led_update();
-			FroboLightHouse_RED_Update();
-			FroboLightHouse_YELLOW_Update();
-			FroboLightHouse_GREEN_Update();
+			LightHouse_Update(red_command, yellow_command, green_command);
 			voltage_update();
 			nmea_tx_status();
 		}
