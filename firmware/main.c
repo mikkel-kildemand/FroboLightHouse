@@ -331,9 +331,7 @@ void state_update(void)
 	{
 		// Blokker, gemt til vedligehold, sættes foran "state = STATE_ERR_WATCHDOG;" : //test-melder ikke fejl på wathdog -
 		
-		if (SWITCH_1_IS_ON) {		//If sw1 is set, the watchdog will nor be never be set.
 		state = STATE_ERR_WATCHDOG;
-		} 
 		FroboLightHouse_param_received = false;
 		red_command = 10;
 		yellow_command = 0;
