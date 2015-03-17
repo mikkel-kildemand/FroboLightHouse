@@ -1,9 +1,9 @@
 ###############################################################################
-# Makefile for the project Row_Cleaner_Frobo_SW
+# Makefile for the project FroboLightHouse_SW
 ###############################################################################
 
 ## General Flags
-PROJECT = Row_Cleaner_Frobo_SW
+PROJECT = FroboLightHouse_SW
 MCU = at90can128
 TARGET = FroboLightHouse_SW.elf
 CC = avr-gcc

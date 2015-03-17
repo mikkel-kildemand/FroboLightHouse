@@ -219,17 +219,6 @@ void LightHouse_Update(int red_command, int yellow_command, int green_command)
 			}
 			break;
 
-
-//		case RYG_MassageSkiped:
-//				red_signal = 1;
-//				yellow_signal = 1;
-//				green_signal = 1;
-//				FroboLightHouse_RED_Update();
-//				FroboLightHouse_YELLOW_Update();
-//				FroboLightHouse_GREEN_Update();
-//				if ((flash_running == 0) && (flash_running == 0) && (flash_running == 0))
-//					light_state = RED_flash;
-//				break;
 		default:
 			light_state = 1;
 

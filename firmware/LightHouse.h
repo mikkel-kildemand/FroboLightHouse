@@ -32,7 +32,7 @@
 # Microcontroller: AT90CAN128
 # Author: Mikkel K. Larsen
 # Created:  2014-10-23 Mikkel K. Larsen
-# Modified: 
+# Modified: 2015-03-10 Mikkel K. Larsen - Code Cleanup
 
 ****************************************************************************/
 /* includes */
@@ -80,25 +80,30 @@
 #define PB_FLIP( port, bit)		port ^= BV(bit) /* flip port bit */
 
 /* ATmega port defines (input) */
-#define PB_IN( ddr, bit)		ddr &= ~BV(bit) /* set port bit as input */
+#define PB_IN( ddr, bit)			ddr &= ~BV(bit) /* set port bit as input */
 #define PB_PULL_UP( port, bit)		PB_HIGH(port, bit) /* enable pull-up resistor */
 #define PB_IS_HIGH( inport, bit)	inport & BV(bit) /* true if port bit is high */
 #define PB_IS_LOW( inport, bit)		!(inport & BV(bit)) /* true if port bit is low */
 
 /* FroboLightHouse RED defines */
 #define INT_RED_INIT			PB_OUT (DDRA,DDA1) /* set LED bit as output */
-#define INT_RED_OFF				PB_LOW (PORTA,PA1) /* turn LED on */
-#define INT_RED_ON				PB_HIGH (PORTA,PA1) /* turn LED off */
+#define INT_RED_OFF				PB_LOW (PORTA,PA1) /* turn LED off */
+#define INT_RED_ON				PB_HIGH (PORTA,PA1) /* turn LED on */
 
 /* FroboLightHouse Yellow defines */
 #define INT_YELLOW_INIT			PB_OUT (DDRA,DDA2) /* set LED bit as output */
-#define INT_YELLOW_OFF				PB_LOW (PORTA,PA2) /* turn LED on */
-#define INT_YELLOW_ON				PB_HIGH (PORTA,PA2) /* turn LED off */
+#define INT_YELLOW_OFF			PB_LOW (PORTA,PA2) /* turn LED off */
+#define INT_YELLOW_ON			PB_HIGH (PORTA,PA2) /* turn LED on */
 
 /* FroboLightHouse Green defines */
 #define INT_GREEN_INIT			PB_OUT (DDRA,DDA3) /* set LED bit as output */
-#define INT_GREEN_OFF				PB_LOW (PORTA,PA3) /* turn LED on */
-#define INT_GREEN_ON				PB_HIGH (PORTA,PA3) /* turn LED off */
+#define INT_GREEN_OFF			PB_LOW (PORTA,PA3) /* turn LED off */
+#define INT_GREEN_ON			PB_HIGH (PORTA,PA3) /* turn LED on */
+
+/* FroboLightHouse Buzzer defines */
+//#define INT_BUZZER_INIT			PB_OUT (DDRA,DDA0) /* set BUZZER bit as output */
+//#define INT_BUZZER_OFF			PB_LOW (PORTA,PA0) /* turn BUZZER off */
+//#define INT_BUZZER_ON			PB_HIGH (PORTA,PA0) /* turn BUZZER on */
 
 /* FroboLightHouse variables */
 

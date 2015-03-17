@@ -30,9 +30,10 @@
 # Project: FroboLightHouse_SW
 # Platform: FroboMind Controller Feb. 2014 http://www.frobomind.org
 # Microcontroller: AT90CAN128
+# Fusebits: EXTENDED: 0xFD , HIGH: 0xC9 , LOW: 0xFF
 # Author: Mikkel K. Larsen
 # Created:  2014-08-28 Mikkel K. Larsen
-# Modified: 
+# Modified: 2014-08-28 Mikkel K. Larsen - Code Cleanup
 *****************************************************************************
 # Most of this file is a modifikation of the file created by Kjeld Jensen.
 # The source is the project: Frobit FroboMind Controller interface 
@@ -68,8 +69,7 @@
 #define STATE_ERR_LOWBAT		5 /* battery voltage too low */
 #define STATE_ERR_ACTUATOR		6 /* battery voltage too low */
 
-//#define VOLTAGE_MIN_DEFAULT		320 /* default minimum voltage (12V) */
-#define VOLTAGE_MIN_DEFAULT		100 /* default minimum voltage (12V) */
+#define VOLTAGE_MIN_DEFAULT		320 /* default minimum voltage (12V) */
 
 /* signal led defines */
 #define LED_STATE_OFF			0
@@ -77,7 +77,7 @@
 #define LED_DELAY				4 /* times the cycle */
 
 /* adc defines */
-#define ADC_NUM					3 /* number of used ADC's */
+#define ADC_NUM					1 /* number of used ADC's */
 #define ADC_VOLT				0 /* voltage measurement */
 #define ADC_IN1					1 /* analog in 1 */
 #define ADC_IN2					2 /* analog in 2 */
@@ -118,7 +118,7 @@ int green;
 char FroboLightHouse_param_received;
 unsigned short nmea_wd_timeout; /* NMEA watchdog timeout [ms] */
 unsigned short nmea_wd; /* NMEA watchdog counter */
-unsigned short pfbst_interval; /* PFBST interval (20-10000) [ms] */
+unsigned short pflst_interval; /* PFLST interval (20-10000) [ms] */
 long nmea_ticks_l, nmea_ticks_r;
 
 /* ADC variables (10 bit [0;1023]) */
@@ -132,9 +132,6 @@ unsigned char battery_low_warning;
 
 /* global and static variables */
 extern char state;
-
-//unsigned volatile char FroboLightHouse_fault_warning;
-//unsigned volatile char FLH_reset;
 
 //void LightHouse_Update(int red_signal, int yellow_signal, int green_signal);
 
@@ -170,8 +167,9 @@ ISR (ADC_vect)
 /* Setup of port used for the Actuator */
 void FroboLightHouse_Init (void)
 {
-	DDRA = 	0b00001111;  //Pin 0, 1, 2 and 3 of PORTA declared as input
-	PORTA= 	0x00;			//No pullup
+INT_RED_INIT;	 /* set LED bit as output */
+INT_YELLOW_INIT; /* set LED bit as output */
+INT_GREEN_INIT;	 /* set LED bit as output */
 }
 
 /***************************************************************************/
@@ -251,8 +249,8 @@ void nmea_init(void)
 	tx[1] = 'P';
 	tx[2] = 'F';
 	tx[3] = 'L';
-	tx[4] = 'S';
-	tx[5] = 'L';
+	tx[4] = 'H';
+	tx[5] = 'I';
 	tx[6] = ',';
 	tx[7] = '2'; /* hw version */		
 	tx[8] = ',';
@@ -284,7 +282,7 @@ void nmea_rx_parse(void)
 		else if (rx[3] == 'C' && rx[4] == 'P') /* Communication Parameters */
 		{
 			rx_ite = 5; /* jump to first value */
-			pfbst_interval = nmea_rx_next_val();
+			pflst_interval = nmea_rx_next_val();
 			if (rx_ite != -1)
 				nmea_wd_timeout = nmea_rx_next_val();
 		}
@@ -430,8 +428,8 @@ int main(void)
 	FroboLightHouse_Init();/* initialize FroboLightHouse (FroboLightHouse port declaration) */
 	adc_init(); /* initialize ADC (battery voltage measurement) */
 	serial_init(); /* initialize serial communication */
-	pfbst_interval = 20; /* send $PFBST at 20 ms interval */
-	nmea_wd_timeout = 1; /* set PFBCT watchdog timeout to 100ms */
+	pflst_interval = 20; /* send $PFLST at 20 ms interval */
+	nmea_wd_timeout = 1; /* set PFLCT watchdog timeout to 100ms */
 	nmea_wd = NMEA_WD_TOUT+1; /* make sure we begin in watchdog timeout state */
 	voltage_min = VOLTAGE_MIN_DEFAULT;
 	battery_low_warning = false;
